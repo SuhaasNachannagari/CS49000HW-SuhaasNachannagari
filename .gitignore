@@ -1,0 +1,12 @@
+# Large model files
+GoogleNews-vectors-negative300.bin
+
+# Python virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Mac OS garbage
+.DS_Store
