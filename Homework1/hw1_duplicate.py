@@ -8,8 +8,6 @@ import os
 from collections import Counter
 from typing import List, Dict, Tuple, Any, Union
 import gensim.models
-import matplotlib.pyplot as plt
-
 
 
 # --- Utility: Data Loader ---
@@ -17,12 +15,12 @@ def get_data(path: str) -> List[Dict[str, Union[str, int]]]:
     """
     Reads a JSONL file and returns a list of dictionaries.
     """
-    dictionaries = []
+    data = []
     with open(path, 'r') as f:
         for line in f:
             if line.strip():
-                dictionaries.append(json.loads(line))
-    return dictionaries
+                data.append(json.loads(line))
+    return data
 
 
 class TextFeaturizer:
@@ -55,56 +53,47 @@ class TextFeaturizer:
         """
         Constructs the vocabulary from the corpus.
         """
+        # Reserve 0 for <UNK>
+        self.word_to_idx['<UNK>'] = 0
+        self.idx_to_word[0] = '<UNK>'
+
         all_tokens = set()
         for text in corpus:
             tokens = self._tokenize(text)
             all_tokens.update(tokens)
         
+        # Sort to ensure deterministic order
         sorted_tokens = sorted(list(all_tokens))
         
         for i, word in enumerate(sorted_tokens, start=1):
             self.word_to_idx[word] = i
             self.idx_to_word[i] = word
-            
-        self.word_to_idx['<UNK>'] = 0
-        self.idx_to_word[0] = '<UNK>'
 
     def to_one_hot(self, text: str) -> np.ndarray:
         """
         Convert text to a Binary Vector. Shape: (actual_vocab_size,)
         """
-        vocab_size = len(self.word_to_idx)
-        vector = np.zeros(vocab_size, dtype=np.float32)
-
-        # Step 2: Tokenize input text
         tokens = self._tokenize(text)
-
-        # Step 3: For each token, set its index to 1
+        vocab_size = len(self.word_to_idx)
+        vec = np.zeros(vocab_size)
+        
         for token in tokens:
-            idx = self.word_to_idx.get(token, 0)
-            vector[idx] = 1.0
-
-        return vector
-        raise NotImplementedError("One-hot encoding not implemented")
+            idx = self.word_to_idx.get(token, 0) # Default to 0 (<UNK>)
+            vec[idx] = 1
+        return vec
 
     def to_bow(self, text: str) -> np.ndarray:
         """
         Convert text to Count Vector. Shape: (actual_vocab_size,)
         """
-        # Step 1: Initialize zero vector
-        vocab_size = len(self.word_to_idx)
-        vector = np.zeros(vocab_size, dtype=np.float32)
-
-        # Step 2: Tokenize text
         tokens = self._tokenize(text)
-
-        # Step 3: Count occurrences
+        vocab_size = len(self.word_to_idx)
+        vec = np.zeros(vocab_size)
+        
         for token in tokens:
-            idx = self.word_to_idx.get(token, 0)
-            vector[idx] += 1.0
-
-        return vector
-        raise NotImplementedError("BoW encoding not implemented")
+            idx = self.word_to_idx.get(token, 0) # Default to 0 (<UNK>)
+            vec[idx] += 1
+        return vec
 
     def to_word2vec(self, text: str) -> np.ndarray:
         """
@@ -112,42 +101,33 @@ class TextFeaturizer:
         Shape: (emb_dim,)
         """
         tokens = self._tokenize(text)
-    
-        # Initialize zero vector
-        vector = np.zeros(self.emb_dim, dtype=np.float32)
-    
-        valid_count = 0  # number of words found in embeddings
-    
+        vectors = []
         for token in tokens:
             if token in self.w2v_model:
-                vector += self.w2v_model[token]
-                valid_count += 1
+                vectors.append(self.w2v_model[token])
         
-        # If no valid embeddings found, return zero vector
-        if valid_count == 0:
-            return vector
+        if not vectors:
+            return np.zeros(self.emb_dim)
         
-        # Compute average
-        vector /= valid_count
-        
-        return vector
-        raise NotImplementedError("Word2Vec encoding not implemented")
+        return np.mean(vectors, axis=0)
 
 
 class SarcasmMLP(nn.Module):
     def __init__(self, input_size: int, hidden_sizes: List[int], output_size: int) -> None:
         super(SarcasmMLP, self).__init__()
-        # TODO: Define layers dynamically
         layers = []
-        for h_dim in hidden_sizes:
-            layers.append(nn.Linear(input_size, h_dim))
+        prev_size = input_size
+        
+        for h_size in hidden_sizes:
+            layers.append(nn.Linear(prev_size, h_size))
             layers.append(nn.ReLU())
-            input_size = h_dim
-        layers.append(nn.Linear(input_size, output_size))
-        self.network = nn.Sequential(*layers)
+            prev_size = h_size
+        
+        layers.append(nn.Linear(prev_size, output_size))
+        self.model = nn.Sequential(*layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.network(x)
+        return self.model(x)
 
 
 def train_loop(
@@ -160,36 +140,42 @@ def train_loop(
     """
     Returns: loss_history, acc_history
     """
-    x_tensor, y_tensor = torch.FloatTensor(X), torch.LongTensor(y)
-    optimizer = optim.Adam(model.parameters(), lr=lr)
-    criterion = nn.CrossEntropyLoss()
+    x_tensor = torch.FloatTensor(X)
+    y_tensor = torch.LongTensor(y)
     
-    loss_history = []
-    accuracy_history = []
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+    
+    loss_history: List[float] = []
+    acc_history: List[float] = []
     
     for epoch in range(epochs):
+        model.train()
+        optimizer.zero_grad()
+        
         # 1. Forward pass
         logits = model(x_tensor)
+        
         # 2. Calculate loss
         loss = criterion(logits, y_tensor)
+        
         # 3. Backward pass & Optimizer step
-        optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        
         # 4. Calculate Accuracy
         with torch.no_grad():
-            correct = 0
-            predictions = torch.argmax(logits, dim=1)
-            
-            for i in range(len(y_tensor)):
-                if predictions[i] == y_tensor[i]:
-                    correct += 1
-            accuracy = correct / len(y_tensor)
-
+            preds = torch.argmax(logits, dim=1)
+            correct = (preds == y_tensor).sum().item()
+            accuracy = correct / y_tensor.size(0)
+        
         loss_history.append(loss.item())
-        accuracy_history.append(accuracy)
+        acc_history.append(accuracy)
+        
+        if (epoch + 1) % 1 == 0:
+            print(f"Epoch [{epoch+1}/{epochs}], Loss: {loss.item():.4f}, Accuracy: {accuracy*100:.2f}%")
     
-    return loss_history, accuracy_history
+    return loss_history, acc_history
 
 
 if __name__ == "__main__":
@@ -199,8 +185,12 @@ if __name__ == "__main__":
     try:
         print("Loading data...")
         # Ensure these files exist in your directory
-        train_data = get_data('train.jsonl')
-        valid_data = get_data('valid.jsonl')
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        train_path = os.path.join(base_path, 'train.jsonl')
+        valid_path = os.path.join(base_path, 'valid.jsonl')
+        
+        train_data = get_data(train_path)
+        valid_data = get_data(valid_path)
         
         train_corpus = [str(d['headline']) for d in train_data]
         train_labels = [int(d['is_sarcastic']) for d in train_data]
@@ -218,8 +208,9 @@ if __name__ == "__main__":
         featurizer = TextFeaturizer(train_corpus, w2v_path="GoogleNews-vectors-negative300.bin")
         
         # --- SELECT FEATURE MODE HERE ---
-        feature_mode = featurizer.to_word2vec # Change this to to_one_hot or to_word2vec as needed
+        feature_mode = featurizer.to_bow  # Change this to to_one_hot or to_word2vec as needed
         
+        print("Vectorizing corpus...")
         x_train = np.array([feature_mode(text) for text in train_corpus])
         y_train = np.array(train_labels)
         
@@ -229,8 +220,8 @@ if __name__ == "__main__":
 
     # 3. Initialize Model
     input_dim = x_train.shape[1]
-    hidden_dims: List[int] = [64, 32]  # TODO: Define hidden layer sizes (for example [128, 64] meaning two hidden layers with 128 and 64 units)
-    output_dim: int = 2  # TODO: Define the dimension of the output layer (number of classes)
+    hidden_dims: List[int] = [128, 64]
+    output_dim: int = 2 # Sarcastic vs Not Sarcastic
     try:
         model = SarcasmMLP(input_dim, hidden_dims, output_dim)
     except NotImplementedError as e:
@@ -239,8 +230,8 @@ if __name__ == "__main__":
 
     # 4. Train
     print("\n--- Training Start ---")
-    learning_rate: float = 0.001  # TODO: Define learning rate
-    num_epochs: int = 90  # TODO: Define number of epochs
+    learning_rate: float = 0.001
+    num_epochs: int = 10
     try:
         losses, accs = train_loop(model, x_train, y_train, lr=learning_rate, epochs=num_epochs)
         print(f"Final Training Loss: {losses[-1]:.4f}")
@@ -252,7 +243,6 @@ if __name__ == "__main__":
     # 5. Prediction (DO NOT MODIFY)
     print("\n--- Generating Predictions ---")
     try:
-        valid_data = get_data('valid.jsonl')
         valid_corpus = [str(d['headline']) for d in valid_data]
         x_valid = np.array([feature_mode(text) for text in valid_corpus])
         x_valid_tensor = torch.FloatTensor(x_valid)
@@ -262,7 +252,7 @@ if __name__ == "__main__":
             logits = model(x_valid_tensor)
             predictions = torch.argmax(logits, dim=1).numpy()
 
-        output_path = "prediction.jsonl"
+        output_path = os.path.join(base_path, "prediction.jsonl")
         with open(output_path, "w") as f:
             for i, pred in enumerate(predictions):
                 record = {
@@ -270,6 +260,7 @@ if __name__ == "__main__":
                     "prediction": int(pred)
                 }
                 f.write(json.dumps(record) + "\n")
+        print(f"Predictions saved to {output_path}")
     except Exception as e:
         print(f"Error during prediction generation: {e}")
 
