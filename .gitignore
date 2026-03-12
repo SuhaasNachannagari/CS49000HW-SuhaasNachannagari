@@ -1,5 +1,6 @@
 # Large model files
 GoogleNews-vectors-negative300.bin
+Homework2/checkpoint.pt
 
 # Python virtual environment
 venv/

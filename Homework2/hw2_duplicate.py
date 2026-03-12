@@ -107,49 +107,37 @@ class SarcasmBERT(nn.Module):
         return logits
 
 # --- Training Loop ---
-def train_loop(
-    model: nn.Module, 
-    dataloader: DataLoader, 
-    device: torch.device, 
-    lr: float, 
-    epochs: int,
-    **kwargs
+def train_loop_step_losses(
+    model,
+    dataloader,
+    device,
+    lr: float,
+    epochs: int
 ) -> List[float]:
-    
-    # We use AdamW as the optimizer
     optimizer = optim.AdamW(model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss()
-    
+
     model.to(device)
     model.train()
-    
-    loss_history = []
-    
-    for epoch in range(epochs):
-        epoch_loss = 0.0
-        for batch in tqdm(dataloader, desc=f"Epoch {epoch+1}/{epochs}"):
-            # TODO: Move batch components to device
+
+    step_losses: List[float] = []
+
+    for _ in range(epochs):
+        for batch in dataloader:
             input_ids = batch["input_ids"].to(device)
             attention_mask = batch["attention_mask"].to(device)
-            labels = batch["label"].to(device).view(-1)
+            labels = batch["label"].to(device).view(-1)  # your code already does this :contentReference[oaicite:4]{index=4}
 
-            # TODO: Forward pass, Loss calculation, Backward pass, Optimizer step
             optimizer.zero_grad(set_to_none=True)
             logits = model(input_ids=input_ids, attention_mask=attention_mask)
             loss = criterion(logits, labels)
             loss.backward()
             optimizer.step()
 
-            epoch_loss += loss.item()
-            
-        avg_loss = epoch_loss / len(dataloader)
-        loss_history.append(avg_loss)
-        print(f"Epoch {epoch+1}/{epochs} - Loss: {avg_loss:.4f}")
+            step_losses.append(loss.item())
 
-        # Feel free to pass additional arguments (like validation dataloader) 
-        # through kwargs and perform validation here.
-        
-    return loss_history
+    return step_losses
+
 
 # --- Main Execution ---
 if __name__ == "__main__":
@@ -212,7 +200,7 @@ if __name__ == "__main__":
             # TODO: Set learning rate and number of epochs
             lr = 2e-5
             epochs = 3
-            train_loop(model, train_loader, device, lr, epochs)
+            train_loop_step_losses(model, train_loader, device, lr, epochs)
         except NotImplementedError:
             print("Error: Implement train_loop.")
             exit(1)
