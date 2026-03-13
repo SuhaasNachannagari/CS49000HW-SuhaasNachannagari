@@ -1,0 +1,189 @@
+{
+  "n_examples": 60000,
+  "by_perturbation_method": {
+    "adjective_relative_clause": {
+      "premise": {
+        "tree_depth": {
+          "mean": 12.7948,
+          "count_non_null": 15000
+        },
+        "subject_verb_distance": {
+          "mean": 4.288839930107119,
+          "count_non_null": 13163
+        },
+        "dependent_clause_count": {
+          "mean": 1.8580666666666668,
+          "count_non_null": 15000
+        },
+        "t_unit_count": {
+          "mean": 1.3024666666666667,
+          "count_non_null": 15000
+        },
+        "dependent_clauses_per_t_unit": {
+          "mean": 1.5206492918192918,
+          "count_non_null": 15000
+        }
+      },
+      "hypothesis": {
+        "tree_depth": {
+          "mean": 9.478866666666667,
+          "count_non_null": 15000
+        },
+        "subject_verb_distance": {
+          "mean": 2.7136906022735294,
+          "count_non_null": 14163
+        },
+        "dependent_clause_count": {
+          "mean": 0.6878666666666666,
+          "count_non_null": 15000
+        },
+        "t_unit_count": {
+          "mean": 1.0774666666666666,
+          "count_non_null": 15000
+        },
+        "dependent_clauses_per_t_unit": {
+          "mean": 0.6522722222222223,
+          "count_non_null": 15000
+        }
+      }
+    },
+    "entity_linked_appositive": {
+      "premise": {
+        "tree_depth": {
+          "mean": 12.2094,
+          "count_non_null": 15000
+        },
+        "subject_verb_distance": {
+          "mean": 5.518284600389864,
+          "count_non_null": 12825
+        },
+        "dependent_clause_count": {
+          "mean": 1.3378666666666668,
+          "count_non_null": 15000
+        },
+        "t_unit_count": {
+          "mean": 1.2717333333333334,
+          "count_non_null": 15000
+        },
+        "dependent_clauses_per_t_unit": {
+          "mean": 1.0781766666666666,
+          "count_non_null": 15000
+        }
+      },
+      "hypothesis": {
+        "tree_depth": {
+          "mean": 9.478866666666667,
+          "count_non_null": 15000
+        },
+        "subject_verb_distance": {
+          "mean": 2.7136906022735294,
+          "count_non_null": 14163
+        },
+        "dependent_clause_count": {
+          "mean": 0.6878666666666666,
+          "count_non_null": 15000
+        },
+        "t_unit_count": {
+          "mean": 1.0774666666666666,
+          "count_non_null": 15000
+        },
+        "dependent_clauses_per_t_unit": {
+          "mean": 0.6522722222222223,
+          "count_non_null": 15000
+        }
+      }
+    },
+    "irrelevant_relative_clause": {
+      "premise": {
+        "tree_depth": {
+          "mean": 13.525333333333334,
+          "count_non_null": 15000
+        },
+        "subject_verb_distance": {
+          "mean": 6.555019157088123,
+          "count_non_null": 13050
+        },
+        "dependent_clause_count": {
+          "mean": 2.0434,
+          "count_non_null": 15000
+        },
+        "t_unit_count": {
+          "mean": 1.2938,
+          "count_non_null": 15000
+        },
+        "dependent_clauses_per_t_unit": {
+          "mean": 1.6872176190476191,
+          "count_non_null": 15000
+        }
+      },
+      "hypothesis": {
+        "tree_depth": {
+          "mean": 9.478866666666667,
+          "count_non_null": 15000
+        },
+        "subject_verb_distance": {
+          "mean": 2.7136906022735294,
+          "count_non_null": 14163
+        },
+        "dependent_clause_count": {
+          "mean": 0.6878666666666666,
+          "count_non_null": 15000
+        },
+        "t_unit_count": {
+          "mean": 1.0774666666666666,
+          "count_non_null": 15000
+        },
+        "dependent_clauses_per_t_unit": {
+          "mean": 0.6522722222222223,
+          "count_non_null": 15000
+        }
+      }
+    },
+    "original": {
+      "premise": {
+        "tree_depth": {
+          "mean": 11.82,
+          "count_non_null": 15000
+        },
+        "subject_verb_distance": {
+          "mean": 3.3893129770992365,
+          "count_non_null": 12838
+        },
+        "dependent_clause_count": {
+          "mean": 1.3478666666666668,
+          "count_non_null": 15000
+        },
+        "t_unit_count": {
+          "mean": 1.2682666666666667,
+          "count_non_null": 15000
+        },
+        "dependent_clauses_per_t_unit": {
+          "mean": 1.0881603174603174,
+          "count_non_null": 15000
+        }
+      },
+      "hypothesis": {
+        "tree_depth": {
+          "mean": 9.478866666666667,
+          "count_non_null": 15000
+        },
+        "subject_verb_distance": {
+          "mean": 2.7136906022735294,
+          "count_non_null": 14163
+        },
+        "dependent_clause_count": {
+          "mean": 0.6878666666666666,
+          "count_non_null": 15000
+        },
+        "t_unit_count": {
+          "mean": 1.0774666666666666,
+          "count_non_null": 15000
+        },
+        "dependent_clauses_per_t_unit": {
+          "mean": 0.6522722222222223,
+          "count_non_null": 15000
+        }
+      }
+    }
+  }
+}

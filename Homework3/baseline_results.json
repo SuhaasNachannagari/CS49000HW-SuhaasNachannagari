@@ -1,0 +1,38 @@
+[
+  {
+    "model_name": "roberta_large_mnli",
+    "architecture_family": "encoder_only_transformer",
+    "backend": "hf",
+    "checkpoint": "FacebookAI/roberta-large-mnli",
+    "baseline_accuracy": 0.9043333333333333,
+    "n_examples": 15000,
+    "status": "ok"
+  },
+  {
+    "model_name": "bart_large_mnli",
+    "architecture_family": "encoder_decoder_transformer",
+    "backend": "hf",
+    "checkpoint": "facebook/bart-large-mnli",
+    "baseline_accuracy": 0.9027333333333334,
+    "n_examples": 15000,
+    "status": "ok"
+  },
+  {
+    "model_name": "deberta_base_mnli",
+    "architecture_family": "disentangled_attention_transformer",
+    "backend": "hf",
+    "checkpoint": "microsoft/deberta-base-mnli",
+    "baseline_accuracy": 0.8884666666666666,
+    "n_examples": 15000,
+    "status": "ok"
+  },
+  {
+    "model_name": "electra_base_mnli",
+    "architecture_family": "electra_discriminator_transformer",
+    "backend": "hf",
+    "checkpoint": "TehranNLP-org/electra-base-mnli",
+    "baseline_accuracy": 0.8734666666666666,
+    "n_examples": 15000,
+    "status": "ok"
+  }
+]
