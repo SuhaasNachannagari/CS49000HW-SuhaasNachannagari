@@ -11,3 +11,4 @@ __pycache__/
 
 # Mac OS garbage
 .DS_Store
+Homework3/predictions.jsonl
